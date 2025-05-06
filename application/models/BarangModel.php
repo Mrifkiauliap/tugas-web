@@ -3,10 +3,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class BarangModel extends CI_Model {
 
-    // Fungsi untuk mengambil semua data barang
-    public function get_all_barang() {
-        // Mengambil data dari tabel 'barang'
-        return $this->db->get('barang')->result();
+    // Fungsi untuk mengambil semua data barang berdasarkan uid
+    public function get_all_barang_by_uid($uid) {
+        // Mengambil data dari tabel 'barang' berdasarkan uid
+        return $this->db->get_where('barang', ['uid' => $uid])->result();
     }
 
     // Fungsi untuk mengambil data barang berdasarkan ID

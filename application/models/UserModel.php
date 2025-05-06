@@ -17,13 +17,24 @@ class UserModel extends CI_Model {
                 return array(
                     'id' => $user->id,
                     'nama' => $user->nama,
-                    'email' => $user->email
+                    'email' => $user->email,
+					'status' => $user->status,
+					'last_login' => $user->last_login
                 );
             }
         }
 
         return false;
     }
+
+	public function update_last_login($id, $status) {
+		$data = [
+			'last_login' => date('Y-m-d H:i:s'),
+			'status' => $status,
+		];
+		$this->db->where('id', $id);
+		$this->db->update('users', $data);
+	}
 
     public function get_user_by_email($email) {
         $this->db->where('email', $email);
@@ -36,16 +47,12 @@ class UserModel extends CI_Model {
         return false;
     }
 
-    public function get_name($id) {
+	public function logout($id) {
+        $data = [
+            'status' => 'Non Aktif',
+        ];
         $this->db->where('id', $id);
-        $query = $this->db->get('users');
-
-        if ($query->num_rows() == 1) {
-            $user = $query->row();
-            return $user->name;
-        }
-
-        return false;
+        $this->db->update('users', $data);
     }
 }
 

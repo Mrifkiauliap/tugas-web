@@ -24,7 +24,8 @@ class BarangController extends CI_Controller {
     public function index() {
         $this->_check_login(); // ⛔ Wajib login dulu
 
-        $data['barang'] = $this->BarangModel->get_all_barang();
+        $uid = $this->session->userdata('user_id');
+        $data['barang'] = $this->BarangModel->get_all_barang_by_uid($uid);
 
         $data['user_name'] = $this->session->userdata('user_nama');
         $this->load->view('barang_view', $data);
@@ -45,7 +46,10 @@ class BarangController extends CI_Controller {
             $data = array(
                 'nama' => $this->input->post('nama'),
                 'harga' => $this->input->post('harga'),
-                'stok' => $this->input->post('stok')
+                'stok' => $this->input->post('stok'),
+                'uid' => $this->session->userdata('user_id'),
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
             );
             $this->BarangModel->insert_barang($data);
             $this->session->set_flashdata('pesan', ['type' => 'success', 'message' => 'Barang berhasil disimpan']);
@@ -72,7 +76,8 @@ class BarangController extends CI_Controller {
             $data_update = array(
                 'nama' => $this->input->post('nama'),
                 'harga' => $this->input->post('harga'),
-                'stok' => $this->input->post('stok')
+                'stok' => $this->input->post('stok'),
+                'updated_at' => date('Y-m-d H:i:s')
             );
 
             $this->form_validation->set_rules('nama', 'Nama', 'required');
