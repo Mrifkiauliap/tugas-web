@@ -90,6 +90,12 @@
     </div>
 
     <script>
+		// Simpan harga tanpa tanda titik ketika di submit
+		document.querySelector('form').addEventListener('submit', function(e) {
+            const harga = document.getElementById('harga');
+            harga.value = parseInt(harga.value.replace(/\./g, ''));
+        });
+
         // Add input formatting for harga
         document.getElementById('harga').addEventListener('blur', function(e) {
             const value = parseInt(e.target.value.replace(/\D/g, ''));

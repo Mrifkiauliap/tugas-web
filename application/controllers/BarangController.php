@@ -3,25 +3,33 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class BarangController extends CI_Controller {
 
-    // Konstruktor untuk memuat model
     public function __construct() {
         parent::__construct();
-        // Memuat model Barang
+        $this->load->library('session'); // penting buat akses session
         $this->load->model('BarangModel');
     }
 
-    // Fungsi untuk menampilkan daftar barang
-    public function index() {
-        // Mengambil data barang dari model
-        $data['barang'] = $this->BarangModel->get_all_barang();
+    // ✅ Fungsi untuk cek login
+    private function _check_login() {
+        if (!$this->session->has_userdata('user_nama')) {
+            redirect('user/login'); // redirect ke halaman login
+        }
+    }
 
-        // Menampilkan view dengan data barang
+    public function index() {
+        $this->_check_login(); // ⛔ Wajib login dulu
+
+        $data['barang'] = $this->BarangModel->get_all_barang();
+        log_message('info', 'Data barang diambil dari database');
+        log_message('info', 'Jumlah barang: ' . count($data['barang']));
+
+        $data['user_name'] = $this->session->userdata('user_nama');
         $this->load->view('barang_view', $data);
     }
 
-    // Fungsi untuk menambah barang
     public function tambah_barang() {
-        // Jika form disubmit, simpan data barang
+        $this->_check_login();
+
         if ($this->input->post()) {
             $data = array(
                 'nama' => $this->input->post('nama'),
@@ -29,21 +37,17 @@ class BarangController extends CI_Controller {
                 'stok' => $this->input->post('stok')
             );
             $this->BarangModel->insert_barang($data);
-
-            // Redirect ke halaman daftar barang
             redirect('BarangController/index');
         }
 
-        // Menampilkan form tambah barang
         $this->load->view('tambah_barang');
     }
 
-    // Fungsi untuk mengedit data barang
     public function edit_barang($id) {
-        // Mengambil data barang berdasarkan ID
+        $this->_check_login();
+
         $data['barang'] = $this->BarangModel->get_barang_by_id($id);
 
-        // Jika form disubmit, simpan perubahan data barang
         if ($this->input->post()) {
             $data_update = array(
                 'nama' => $this->input->post('nama'),
@@ -51,21 +55,16 @@ class BarangController extends CI_Controller {
                 'stok' => $this->input->post('stok')
             );
             $this->BarangModel->update_barang($id, $data_update);
-
-            // Redirect ke halaman daftar barang
             redirect('BarangController/index');
         }
 
-        // Menampilkan form edit barang
         $this->load->view('edit_barang', $data);
     }
 
-    // Fungsi untuk menghapus data barang
     public function delete_barang($id) {
-        // Menghapus data barang berdasarkan ID
-        $this->BarangModel->delete_barang($id);
+        $this->_check_login();
 
-        // Redirect ke halaman daftar barang setelah penghapusan
+        $this->BarangModel->delete_barang($id);
         redirect('BarangController/index');
     }
 }

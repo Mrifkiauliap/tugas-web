@@ -58,3 +58,7 @@ $route['barang'] = 'BarangController/index'; // Routing untuk menampilkan daftar
 $route['barang/tambah'] = 'BarangController/tambah_barang'; // Routing untuk halaman tambah barang
 $route['barang/edit/(:num)'] = 'BarangController/edit_barang/$1'; // Routing untuk halaman edit barang
 $route['barang/hapus/(:num)'] = 'BarangController/hapus_barang/$1'; // Routing untuk menghapus barang
+
+$route['user/register'] = 'UserController/register'; // Routing untuk halaman register
+$route['user/login'] = 'UserController/login'; // Routing untuk halaman login
+$route['user/logout'] = 'UserController/logout'; // Routing untuk logout
