@@ -3,70 +3,122 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class BarangController extends CI_Controller {
 
-    // Konstruktor untuk memuat model
     public function __construct() {
         parent::__construct();
-        // Memuat model Barang
+        $this->load->library('session'); // penting buat akses session
         $this->load->model('BarangModel');
+		$this->load->library('form_validation'); // untuk validasi form
     }
 
-    // Fungsi untuk menampilkan daftar barang
-    public function index() {
-        // Mengambil data barang dari model
-        $data['barang'] = $this->BarangModel->get_all_barang();
+    // ✅ Fungsi untuk cek login
+    private function _check_login() {
+        if (!$this->session->has_userdata('user_nama')) {
+            $this->session->set_flashdata('pesan', [
+                'type' => 'error',
+                'message' => 'Anda belum login!'
+            ]);
+            redirect('user/login'); // redirect ke halaman login
+        }
+    }
 
-        // Menampilkan view dengan data barang
+    public function index() {
+        $this->_check_login(); // ⛔ Wajib login dulu
+
+        $uid = $this->session->userdata('user_id');
+        $data['barang'] = $this->BarangModel->get_all_barang_by_uid($uid);
+
+        $data['user_name'] = $this->session->userdata('user_nama');
         $this->load->view('barang_view', $data);
     }
 
-    // Fungsi untuk menambah barang
     public function tambah_barang() {
-        // Jika form disubmit, simpan data barang
-        if ($this->input->post()) {
+		// Cek apakah user sudah login
+        $this->_check_login();
+		// Validasi form tambah barang
+        $this->form_validation->set_rules('nama', 'Nama Barang', 'required|trim');
+        $this->form_validation->set_rules('harga', 'Harga', 'required|numeric');
+        $this->form_validation->set_rules('stok', 'Stok', 'required|numeric');
+
+        if ($this->form_validation->run() == FALSE) {
+            $this->session->set_flashdata('pesan', ['type' => 'danger', 'message' => 'Gagal menambah barang']);
+            $this->load->view('tambah_barang');
+        } else {
             $data = array(
                 'nama' => $this->input->post('nama'),
                 'harga' => $this->input->post('harga'),
-                'stok' => $this->input->post('stok')
+                'stok' => $this->input->post('stok'),
+                'uid' => $this->session->userdata('user_id'),
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
             );
             $this->BarangModel->insert_barang($data);
+            $this->session->set_flashdata('pesan', ['type' => 'success', 'message' => 'Barang berhasil disimpan']);
+            redirect('BarangController/index');
+        }
+    }
 
-            // Redirect ke halaman daftar barang
+    public function edit_barang($id) {
+        $this->_check_login();
+
+        // Validasi id barang
+        $barang = $this->BarangModel->get_barang_by_id($id);
+        if (!$barang) {
+            $this->session->set_flashdata('pesan', [
+                'type' => 'danger',
+                'message' => 'Barang tidak ditemukan'
+            ]);
             redirect('BarangController/index');
         }
 
-        // Menampilkan form tambah barang
-        $this->load->view('tambah_barang');
-    }
+        $data['barang'] = $barang;
 
-    // Fungsi untuk mengedit data barang
-    public function edit_barang($id) {
-        // Mengambil data barang berdasarkan ID
-        $data['barang'] = $this->BarangModel->get_barang_by_id($id);
-
-        // Jika form disubmit, simpan perubahan data barang
         if ($this->input->post()) {
             $data_update = array(
                 'nama' => $this->input->post('nama'),
                 'harga' => $this->input->post('harga'),
-                'stok' => $this->input->post('stok')
+                'stok' => $this->input->post('stok'),
+                'updated_at' => date('Y-m-d H:i:s')
             );
-            $this->BarangModel->update_barang($id, $data_update);
 
-            // Redirect ke halaman daftar barang
-            redirect('BarangController/index');
+            $this->form_validation->set_rules('nama', 'Nama', 'required');
+            $this->form_validation->set_rules('harga', 'Harga', 'required|numeric');
+            $this->form_validation->set_rules('stok', 'Stok', 'required|numeric');
+
+            if ($this->form_validation->run() == FALSE) {
+                $this->session->set_flashdata('pesan', [
+                    'type' => 'danger',
+                    'message' => 'Gagal mengedit barang'
+                ]);
+            } else {
+                $this->BarangModel->update_barang($id, $data_update);
+                $this->session->set_flashdata('pesan', [
+                    'type' => 'success',
+                    'message' => 'Barang berhasil diedit'
+                ]);
+                redirect('BarangController/index');
+            }
         }
 
-        // Menampilkan form edit barang
         $this->load->view('edit_barang', $data);
     }
 
-    // Fungsi untuk menghapus data barang
     public function delete_barang($id) {
-        // Menghapus data barang berdasarkan ID
-        $this->BarangModel->delete_barang($id);
+        $this->_check_login();
 
-        // Redirect ke halaman daftar barang setelah penghapusan
+        $barang = $this->BarangModel->get_barang_by_id($id);
+        if (!$barang) {
+            $this->session->set_flashdata('pesan', [
+                'type' => 'danger',
+                'message' => 'Barang tidak ditemukan'
+            ]);
+        } else {
+            $this->BarangModel->delete_barang($id);
+            $this->session->set_flashdata('pesan', [
+                'type' => 'success',
+                'message' => 'Barang berhasil dihapus'
+            ]);
+        }
         redirect('BarangController/index');
     }
 }
-?>
+
