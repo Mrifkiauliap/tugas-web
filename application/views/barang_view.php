@@ -24,6 +24,13 @@
                 <a href="<?= site_url('userController/logout') ?>" class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-5 py-2.5 rounded-lg transition-all duration-300 shadow hover:shadow-md ml-4">Logout</a>
             </div>
         </div>
+
+        <!-- Session flash message -->
+        <?php if ($this->session->flashdata('pesan')): ?>
+            <div class="mb-4 p-4 <?= $this->session->flashdata('pesan')['type'] == 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'; ?> rounded-lg">
+                <?= $this->session->flashdata('pesan')['message'] ?>
+            </div>
+        <?php endif; ?>
         
         <!-- Card container -->
         <div class="bg-white rounded-xl shadow-lg overflow-hidden">
@@ -116,3 +123,4 @@
 </body>
 
 </html>
+

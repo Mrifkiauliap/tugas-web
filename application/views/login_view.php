@@ -20,9 +20,17 @@
         <form class="bg-white rounded px-8 pt-6 pb-8 mb-4" method="post" action="<?= base_url('user/login') ?>">
             <h1 class="text-2xl font-bold mb-4 text-center">Login</h1>
 
-            <?php if ($this->session->flashdata('error')): ?>
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                    <?= $this->session->flashdata('error'); ?>
+            <?php if ($this->session->flashdata('pesan')): ?>
+                <div class="mb-4 p-4 <?= $this->session->flashdata('pesan')['type'] == 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'; ?> rounded-lg">
+                    <?= $this->session->flashdata('pesan')['message'] ?>
+                </div>
+            <?php elseif (validation_errors()): ?>
+                <div class="mb-4 p-4 bg-red-100 text-red-800 rounded-lg">
+                    <?= validation_errors() ?>
+                </div>
+            <?php else: ?>
+                <div class="mb-4 p-4 bg-green-100 text-green-800 rounded-lg">
+                    Logged out successfully
                 </div>
             <?php endif; ?>
 

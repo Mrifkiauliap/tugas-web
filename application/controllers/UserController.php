@@ -11,6 +11,7 @@ class UserController extends CI_Controller {
     }
 
     public function register() {
+		# Validasi form registrasi
         $this->form_validation->set_rules('nama', 'Nama', 'required');
         $this->form_validation->set_rules('email', 'Email', 'required|valid_email|is_unique[users.email]');
         $this->form_validation->set_rules('password', 'Password', 'required|min_length[6]');
@@ -29,6 +30,7 @@ class UserController extends CI_Controller {
     }
 
     public function login() {
+		# Validasi form login
         $this->form_validation->set_rules('email', 'Email', 'required|valid_email');
         $this->form_validation->set_rules('password', 'Password', 'required');
 
@@ -49,19 +51,29 @@ class UserController extends CI_Controller {
                     $this->session->set_userdata($data);
                     redirect('BarangController/index');
                 } else {
-                    $this->session->set_flashdata('error', 'Invalid email or password');
+                    $this->session->set_flashdata('pesan', array(
+                        'type' => 'danger',
+                        'message' => 'Email atau password salah'
+                    ));
                     redirect('user/login');
                 }
             } else {
-                $this->session->set_flashdata('error', 'Invalid email or password');
+                $this->session->set_flashdata('pesan', array(
+                    'type' => 'danger',
+                    'message' => 'Email atau password salah'
+                ));
                 redirect('user/login');
             }
         }
     }
 
     public function logout() {
+		# Hapus session user
         $this->session->sess_destroy();
-        $this->session->set_flashdata('success', 'Logged out successfully');
+        $this->session->set_flashdata('pesan', array(
+            'type' => 'success',
+            'message' => 'Logged out successfully'
+        ));
         redirect('user/login');
     }
 }
